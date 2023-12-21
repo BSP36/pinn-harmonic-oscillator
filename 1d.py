@@ -2,6 +2,10 @@ import torch
 import matplotlib.pyplot as plt
 from model import WaveFunction
 
+mass = 1.0
+hbar = 1.0
+kf = -0.5 * hbar ** 2 / mass
+
 
 def train(phi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
     phi = phi.to(device)
@@ -26,7 +30,7 @@ def train(phi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
         ddy = torch.autograd.grad(dy, x, create_graph=True)
 
         for i in range(batch_size):
-            ham += 0.5 * (y[i] * (y[i] * x[i] ** 2 - ddy[i]))
+            ham += y[i] * (potential(x[i]) * y[i] + kf * ddy[i])
             norm += y[i] * y[i]
         loss = ham / norm
 
@@ -41,6 +45,9 @@ def train(phi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
                 dx=L/batch_size,
             )
 
+def potential(x):
+     omega = 1.0
+     return 0.5 * (omega * x) ** 2
 
 def show_wavefunction(model, x_in, dx):
         model.eval()
@@ -50,8 +57,7 @@ def show_wavefunction(model, x_in, dx):
         
         plt.scatter(x_in[:], y_out[:, 0] / torch.sqrt(norm), s=1)  
         plt.show()
-            
-            
+
 
 if __name__ == "__main__":
     phi = WaveFunction(in_dim=1, num_mid_layers=5)
