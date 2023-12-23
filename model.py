@@ -2,9 +2,8 @@ import torch.nn as nn
 
 
 class WaveFunction(nn.Module):
-    def __init__(self, in_dim, num_mid_layers):
+    def __init__(self, in_dim, num_mid_layers, mid_dim=32, out_dim=1):
         super(WaveFunction, self).__init__()
-        mid_dim = 32
         self.lr = nn.ModuleList()
         self.lr.append(
             nn.Sequential(
@@ -19,7 +18,7 @@ class WaveFunction(nn.Module):
                     nn.SiLU(),
                 )
             )
-        self.lr.append(nn.Sequential(nn.Linear(mid_dim, 1)))
+        self.lr.append(nn.Linear(mid_dim, out_dim))
     
     def forward(self, x):
         for layer in self.lr:
