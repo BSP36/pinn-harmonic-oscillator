@@ -6,11 +6,11 @@ mass = 1.0
 hbar = 1.0
 
 kf = -0.5 * hbar ** 2 / mass
-L = L_max - L_min
 
 
 def train(psi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
     psi = psi.to(device)
+    L = L_max - L_min
 
     for epoch in range(num_epoch):
         psi.train()
