@@ -4,24 +4,25 @@ from model import WaveFunction
 
 mass = 1.0
 hbar = 1.0
+
 kf = -0.5 * hbar ** 2 / mass
+L = L_max - L_min
 
 
-def train(phi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
-    phi = phi.to(device)
+def train(psi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
+    psi = psi.to(device)
 
     for epoch in range(num_epoch):
-        phi.train()
+        psi.train()
         optimizer.zero_grad()
         ham = 0.0
         norm = 0.0
         """
         Monte-Carlo integration or Newton–Cotes formulae
         """
-        L = L_max - L_min
         # x = [torch.rand(1, requires_grad=True) * dL + L_min for _ in range(batch_size)]    
         x = [torch.tensor([i/float(batch_size)], requires_grad=True).to(device) * L + L_min for i in range(batch_size)]  
-        y = phi(torch.stack(x, dim=0))
+        y = psi(torch.stack(x, dim=0))
         y = [y[i, 0].to(device) for i in range(batch_size)]
         """
         automatic differentiation
@@ -40,7 +41,7 @@ def train(phi, num_epoch, batch_size, optimizer, L_max, L_min, device="cpu"):
         print(epoch, loss.item())
         if (epoch+1) % 500 == 0:
             show_wavefunction(
-                model=phi,
+                model=psi,
                 x_in=torch.arange(start=-10.0, end=10.0, step=0.1),
                 dx=L/batch_size,
             )
@@ -60,11 +61,11 @@ def show_wavefunction(model, x_in, dx):
 
 
 if __name__ == "__main__":
-    phi = WaveFunction(in_dim=1, num_mid_layers=5)
-    optimizer = torch.optim.Adam(phi.parameters(), lr=1e-3)
+    psi = WaveFunction(in_dim=1, num_mid_layers=5)
+    optimizer = torch.optim.Adam(psi.parameters(), lr=1e-3)
 
     train(
-        phi=phi,
+        psi=psi,
         num_epoch=5000,
         batch_size=512,
         optimizer=optimizer,
